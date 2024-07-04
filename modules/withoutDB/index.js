@@ -1,5 +1,5 @@
 const { note, outro, intro, spinner } = require("@clack/prompts");
-const { sleep, getAppInputs, writeTsConfigJson, writeIndex, generateDate, getDIRs, writePackageJson, installDependencies, writeEnv } = require("../../commons");
+const { sleep, getAppInputs, writeTsConfigJson, writeIndex, generateDate, getDIRs, writePackageJson, installDependencies, writeEnv, writeIndexEJS, writeUtils } = require("../../commons");
 const colors = require("colors");
 
 
@@ -19,11 +19,13 @@ module.exports = {
         }
         const addNecessaryFiles = spinner();
         addNecessaryFiles.start("Configuring project");
-        const { projectDirectory, srcDir } = getDIRs(options);
+        const { projectDirectory, srcDir, viewsDir } = getDIRs(options);
         writeTsConfigJson(projectDirectory);
         writePackageJson(projectDirectory, options.appName);
         writeIndex(srcDir);
         writeEnv(projectDirectory, options);
+        writeIndexEJS(viewsDir);
+        writeUtils(srcDir);
         addNecessaryFiles.stop("Configuration Complete!");
         const getDependencies = spinner();
 

@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util")
 const { exec } = require("child_process");
-const { PACKAGE_JSON, TS_CONFIG_JSON, WITHOUT_DB_INDEX_FILE, DB_CONNECTION, DB_TEST_CONNECTION, INDEX_FILE_WITH_TEST_API } = require("./constants");
+const { PACKAGE_JSON, TS_CONFIG_JSON, WITHOUT_DB_INDEX_FILE, DB_CONNECTION, DB_TEST_CONNECTION, INDEX_FILE_WITH_TEST_API, INDEX_EJS, ROUTES_FILE, ROUTE_TYPES } = require("./constants");
 
 const validatePort = function (port) {
     if (port.length == 0) return `Value is required!`;
@@ -99,12 +99,14 @@ module.exports = {
         const distDir = path.join(projectDirectory, "dist");
         fs.mkdirSync(srcDir);
         fs.mkdirSync(distDir);
+        const viewsDir = path.join(srcDir, "views");
+        fs.mkdirSync(viewsDir);
         let dbDir = "";
         if (db) {
             dbDir = path.join(srcDir, "database");
             fs.mkdirSync(dbDir);
         }
-        return { projectDirectory, srcDir, distDir, dbDir };
+        return { projectDirectory, srcDir, distDir, dbDir, viewsDir };
     },
     writeTsConfigJson: function (projectDirectory) {
         const tsconfigJson = TS_CONFIG_JSON
@@ -132,18 +134,26 @@ module.exports = {
 
         fs.writeFileSync(path.join(srcDir, "index.ts"), indexTs);
     },
+    writeIndexEJS: function (viewsDir) {
+        const indexEJS = INDEX_EJS;
+
+        fs.writeFileSync(path.join(viewsDir, "index.ejs"), indexEJS);
+    },
+    writeUtils: function (srcDir) {
+        const routesFile = ROUTES_FILE;
+        const routeType = ROUTE_TYPES;
+
+        fs.writeFileSync(path.join(srcDir, "routes.ts"), routesFile);
+        fs.writeFileSync(path.join(srcDir, "types.ts"), routeType);
+    },
     writeEnv: function (projectDirectory, options) {
-        const env = `PORT=${options.appPort}`;
+        const env = `NAME=${options.appName}\nPORT=${options.appPort}`;
         fs.writeFileSync(path.join(projectDirectory, ".env"), env);
     },
     writeEnvWithDBConfig: function (projectDirectory, options, type) {
-        const env = `
-PORT=${options.appPort}
-DB_HOST=localhost
-DB_PORT=${options.dbPort}
-DB_USERNAME=postgres
-DB_NAME=postgres
-DB_PASSWORD=${options.secret}
+        const env =
+            `NAME=${options.appName}\nPORT=${options.appPort}\nDB_HOST=localhost\n
+DB_PORT=${options.dbPort}\nDB_USERNAME=postgres\nDB_NAME=postgres\nDB_PASSWORD=${options.secret}\n
 DB_CONTAINER_NAME=${options.appName}-${type}c
 `;
 

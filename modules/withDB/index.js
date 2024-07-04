@@ -1,5 +1,5 @@
 const { note, outro, intro, spinner } = require("@clack/prompts");
-const { writeTsConfigJson, writeIndex, generateDate, getDIRs, writePackageJson, installDependencies, installPostgres, runPostgresContainer, writeEnvWithDBConfig, writeDatabaseFiles } = require("../../commons");
+const { writeTsConfigJson, writeIndex, generateDate, getDIRs, writePackageJson, installDependencies, installPostgres, runPostgresContainer, writeEnvWithDBConfig, writeDatabaseFiles, writeIndexEJS, writeUtils } = require("../../commons");
 const colors = require("colors");
 const { sleep, getAppInputs, getDBInputs } = require("../../commons");
 
@@ -23,12 +23,14 @@ module.exports = {
 
         const addNecessaryFiles = spinner();
         addNecessaryFiles.start("Configuring project");
-        const { projectDirectory, srcDir, dbDir } = getDIRs(options, "getDbDir");
+        const { projectDirectory, srcDir, dbDir, viewsDir } = getDIRs(options, "getDbDir");
         writeTsConfigJson(projectDirectory);
         writePackageJson(projectDirectory, options.appName, "addDBLibs");
         writeIndex(srcDir, "getIndexWithDbRoutes");
         writeEnvWithDBConfig(projectDirectory, options, 'psql');
         writeDatabaseFiles(dbDir);
+        writeIndexEJS(viewsDir);
+        writeUtils(srcDir);
         addNecessaryFiles.stop("Configuration Complete!");
         const getDependencies = spinner();
 
